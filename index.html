@@ -1,391 +1,170 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>拼音打字小勇士</title>
-  <style>
-    * { box-sizing: border-box; }
-    :root{
-      --ink:#f7fbff; --muted:#b9c7e6; --panel:rgba(9,18,45,.82); --panel2:rgba(17,31,72,.74);
-      --cyan:#55e6ff; --gold:#ffd166; --pink:#ff5ca8; --green:#7cffb2; --danger:#ff4d6d;
-    }
-    body {
-      margin: 0;
-      font-family: "KaiTi", "STKaiti", "楷体", "KaiTi_GB2312", serif;
-      min-height: 100vh;
-      overflow-x: hidden;
-      color: var(--ink);
-      background:
-        radial-gradient(circle at 15% 18%, rgba(85,230,255,.30) 0 11%, transparent 27%),
-        radial-gradient(circle at 82% 12%, rgba(255,92,168,.20) 0 9%, transparent 24%),
-        radial-gradient(circle at 50% 95%, rgba(255,209,102,.16) 0 16%, transparent 34%),
-        linear-gradient(135deg, #071124 0%, #101a3b 38%, #251540 72%, #071124 100%);
-    }
-    body::before{
-      content:""; position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.55;
-      background:
-        linear-gradient(rgba(85,230,255,.09) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(85,230,255,.09) 1px, transparent 1px);
-      background-size: 56px 56px;
-      mask-image: linear-gradient(to bottom, rgba(0,0,0,.9), rgba(0,0,0,.15));
-    }
-    body::after{
-      content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
-      background: radial-gradient(circle, rgba(255,255,255,.18) 1px, transparent 1.5px);
-      background-size: 34px 34px; animation: drift 18s linear infinite; opacity:.45;
-    }
-    @keyframes drift{to{background-position:340px 170px;}}
-    .cloud,.hill,.star-bg{display:none;}
-    .app{position:relative; z-index:1; max-width:1040px; margin:0 auto; padding:28px;}
-    .card{
-      background: linear-gradient(180deg, rgba(13,28,68,.90), rgba(10,18,43,.84));
-      border:1px solid rgba(85,230,255,.36); border-radius:30px; padding:26px;
-      box-shadow: 0 24px 70px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.07);
-      backdrop-filter: blur(10px);
-    }
-    h1{margin:0 0 10px; font-size:clamp(34px,5vw,58px); text-align:center; color:#fff; letter-spacing:3px; text-shadow:0 0 18px rgba(85,230,255,.5), 0 3px 0 rgba(0,0,0,.25);}
-    .subtitle{text-align:center; font-size:24px; color:var(--muted); margin-bottom:20px;}
-    .mascot{font-size:62px; text-align:center; margin:8px 0 12px; filter: drop-shadow(0 0 16px rgba(85,230,255,.45));}
-    .btn{border:0; border-radius:16px; padding:14px 26px; font-family:inherit; font-size:24px; font-weight:bold; cursor:pointer; margin:8px; color:#061225; background:linear-gradient(180deg,#7cffb2,#20d483); box-shadow:0 8px 0 #0e8c55,0 0 22px rgba(124,255,178,.26); transition:.12s;}
-    .btn:hover{transform:translateY(-2px); filter:brightness(1.05);} .btn:active{transform:translateY(5px); box-shadow:0 3px 0 #0e8c55;}
-    .btn.secondary{background:linear-gradient(180deg,#55e6ff,#38a7ff); box-shadow:0 8px 0 #1769a8,0 0 22px rgba(85,230,255,.25);}
-    .btn.locked{background:linear-gradient(180deg,#657086,#3d465a); color:#cbd5e1; box-shadow:0 8px 0 #252b38; cursor:not-allowed;}
-    .center{text-align:center;}
-    .level-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:18px; margin-top:20px;}
-    .level-card{background:linear-gradient(180deg,rgba(21,42,92,.86),rgba(15,27,63,.78)); border:1px solid rgba(255,255,255,.12); border-radius:24px; padding:18px; text-align:center; min-height:220px; box-shadow:inset 0 0 28px rgba(85,230,255,.06);}
-    .level-card h2{font-size:30px; margin:8px 0; color:var(--gold);} .level-card p{font-size:21px; margin:8px 0; color:var(--muted);} .badge{font-size:46px; filter:drop-shadow(0 0 12px rgba(255,209,102,.45));}
-    .hud{display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:18px;}
-    .hud div{background:rgba(3,9,24,.62); border:1px solid rgba(85,230,255,.32); border-radius:16px; padding:10px; font-size:21px; text-align:center; font-weight:bold; color:#eaf6ff; box-shadow:inset 0 0 18px rgba(85,230,255,.07);}
-    .stage-title{text-align:center; font-size:34px; color:var(--gold); margin:6px 0 12px; text-shadow:0 0 14px rgba(255,209,102,.35);}
-    .play-area{position:relative; min-height:390px; border-radius:28px; overflow:hidden; padding:18px; background:linear-gradient(180deg,rgba(9,21,52,.95),rgba(18,15,51,.96)); border:1px solid rgba(85,230,255,.45); box-shadow:inset 0 0 60px rgba(85,230,255,.10), inset 0 -60px 80px rgba(255,92,168,.08);}
-    .play-area::before{content:""; position:absolute; inset:0; pointer-events:none; background:radial-gradient(circle at 50% 40%, rgba(85,230,255,.16), transparent 32%), linear-gradient(90deg,transparent 0 48%, rgba(85,230,255,.10) 49%, transparent 50%);}
-    .play-area::after{content:""; position:absolute; left:8%; right:8%; top:64%; height:1px; background:linear-gradient(90deg,transparent,rgba(85,230,255,.7),transparent); box-shadow:0 0 16px rgba(85,230,255,.8); opacity:.7;}
-    .track{position:absolute; left:0; right:0; bottom:0; height:68px; background:linear-gradient(180deg,rgba(85,230,255,.06),rgba(85,230,255,.16)); border-top:1px solid rgba(85,230,255,.45);}
-    .track::before{content:""; position:absolute; inset:0; background:repeating-linear-gradient(90deg,transparent 0 34px,rgba(85,230,255,.18) 34px 36px);}
-    .balloon-wrap{height:238px; display:flex; justify-content:center; align-items:center; perspective:900px;}
-    .balloon{width:172px; height:172px; border-radius:50%; display:flex; align-items:center; justify-content:center; position:relative; isolation:isolate; transition:transform .35s linear, filter .2s; animation:orbFloat 2.4s infinite alternate ease-in-out; background:radial-gradient(circle at 34% 25%,rgba(255,255,255,.95) 0 8%,rgba(85,230,255,.72) 13%,rgba(74,99,255,.86) 44%,rgba(255,92,168,.82) 78%); box-shadow:inset -18px -24px 40px rgba(0,0,0,.28), inset 12px 14px 22px rgba(255,255,255,.13),0 0 26px rgba(85,230,255,.55),0 20px 42px rgba(0,0,0,.32);}
-    .balloon::before{content:""; position:absolute; inset:-8px; border-radius:50%; border:2px solid rgba(85,230,255,.50); box-shadow:0 0 18px rgba(85,230,255,.55), inset 0 0 20px rgba(255,255,255,.08); z-index:-1; animation:ringSpin 5s linear infinite;}
-    .balloon::after{content:""; position:absolute; left:50%; bottom:-44px; width:3px; height:48px; background:linear-gradient(var(--cyan),transparent); box-shadow:0 0 8px var(--cyan); transform:translateX(-50%);}
-    .word{font-family:"KaiTi","STKaiti","楷体","KaiTi_GB2312",serif; font-size:clamp(38px,7vw,76px); font-weight:bold; color:white; text-shadow:0 3px 8px rgba(0,0,0,.45),0 0 18px rgba(255,255,255,.25); padding:10px; text-align:center; line-height:1.08;}
-    @keyframes orbFloat{from{transform:translateY(8px) rotateX(0deg) scale(var(--scale,1));} to{transform:translateY(-12px) rotateX(6deg) scale(var(--scale,1));}}
-    @keyframes ringSpin{to{transform:rotate(360deg);}}
-    .danger{animation:dangerPulse .16s infinite alternate!important; filter:saturate(1.45) brightness(1.08);} @keyframes dangerPulse{from{transform:translateX(-4px) scale(var(--scale,1)); box-shadow:0 0 28px rgba(255,77,109,.7),0 20px 42px rgba(0,0,0,.32);} to{transform:translateX(4px) scale(calc(var(--scale,1) + .05)); box-shadow:0 0 42px rgba(255,77,109,.95),0 20px 42px rgba(0,0,0,.32);}}
-    .pop{animation:energyPop .55s forwards!important;} @keyframes energyPop{0%{transform:scale(var(--scale,1)); opacity:1; filter:brightness(1);}55%{transform:scale(1.72); opacity:.92; filter:brightness(2.4);}100%{transform:scale(.08); opacity:0; filter:brightness(3);}}
-    .particle{position:absolute; left:50%; top:42%; width:10px; height:10px; border-radius:50%; background:var(--cyan); pointer-events:none; animation:burst .9s cubic-bezier(.1,.75,.25,1) forwards; z-index:5; box-shadow:0 0 12px currentColor; color:var(--cyan);} .particle:nth-child(2n){background:var(--pink); color:var(--pink);} .particle:nth-child(3n){background:var(--gold); color:var(--gold);} .particle:nth-child(4n){background:var(--green); color:var(--green);} @keyframes burst{0%{transform:translate(0,0) scale(1.4); opacity:1;}70%{opacity:1;}100%{transform:translate(var(--x),var(--y)) scale(.05); opacity:0;}}
-    .screen-flash{animation:flash .38s ease-out;} @keyframes flash{0%{box-shadow:inset 0 0 0 999px rgba(255,255,255,.65);}100%{box-shadow:inset 0 0 0 0 rgba(255,255,255,0);}}
-    .timer-hot{color:var(--danger); animation:pulse .35s infinite alternate;} @keyframes pulse{from{transform:scale(1);}to{transform:scale(1.18);}}
-    .input-row{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:14px; position:relative; z-index:2;}
-    input{width:min(520px,90%); border:2px solid rgba(85,230,255,.65); border-radius:18px; padding:14px 18px; font-size:28px; text-align:center; outline:none; font-family:Arial,sans-serif; color:#ecfeff; background:rgba(2,8,23,.72); box-shadow:0 0 18px rgba(85,230,255,.12);}
-    input::placeholder{color:#90a4c4;} input:focus{border-color:var(--gold); box-shadow:0 0 24px rgba(255,209,102,.25);}
-    .feedback{text-align:center; font-size:28px; min-height:42px; margin-top:12px; font-weight:bold; position:relative; z-index:2;} .correct{color:var(--green);} .wrong{color:var(--danger);} .pinyin-show{text-align:center; font-size:25px; color:#c9f6ff; min-height:34px; font-family:Arial,sans-serif; position:relative; z-index:2;}
-    .hidden{display:none;} .result-list{font-size:25px; line-height:1.8; text-align:center; color:#eaf6ff;} .badge-row{text-align:center; font-size:60px; margin:15px 0;} .sparkle{animation:sparkle .8s ease-in-out infinite alternate;} @keyframes sparkle{from{transform:scale(1);}to{transform:scale(1.15) rotate(4deg);}}
-    @media(max-width:680px){.hud{grid-template-columns:repeat(2,1fr);} .app{padding:12px;} .balloon{width:150px;height:150px;} }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>拼拼熊大冒险 V3 - Tension UI</title>
+<style>
+:root{
+  --kaiti:"KaiTi","STKaiti","楷体","KaiTi_GB2312",serif;
+  --ui:"Arial Rounded MT Bold","Segoe UI",sans-serif;
+}
+*{box-sizing:border-box} html,body{margin:0;height:100%;overflow:hidden;font-family:var(--ui);background:#10182b;color:#fff;}
+button,input{font-family:var(--ui)}
+#app{position:relative;width:100vw;height:100vh;overflow:hidden;}
+.screen{position:absolute;inset:0;display:none;overflow:hidden}.screen.active{display:block}
+.bg{position:absolute;inset:0;overflow:hidden;pointer-events:none}.layer{position:absolute;inset:0;pointer-events:none}
+.float{animation:float 2.4s ease-in-out infinite}@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.pulse{animation:pulse 1.2s ease-in-out infinite}@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+.btn{border:0;border-radius:999px;padding:14px 28px;font-size:22px;font-weight:800;cursor:pointer;background:linear-gradient(180deg,#ffe071,#ff9f1c);box-shadow:0 8px 0 #b85d00,0 14px 25px rgba(0,0,0,.25);color:#542600;transition:.12s;position:relative;z-index:10}.btn:hover{filter:brightness(1.08);transform:translateY(-2px)}.btn:active{transform:translateY(5px);box-shadow:0 3px 0 #b85d00}
+.smallbtn{font-size:16px;padding:9px 16px}
+.panel{position:relative;z-index:5;background:rgba(255,255,255,.16);backdrop-filter:blur(12px);border:2px solid rgba(255,255,255,.35);border-radius:28px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.title{font-family:var(--kaiti);font-size:62px;margin:0;text-shadow:0 6px 0 rgba(0,0,0,.18)}
+.subtitle{font-family:var(--kaiti);font-size:28px;margin:10px 0 22px;color:#fff7cd}.menu{height:100%;display:flex;align-items:center;justify-content:center;text-align:center;padding:28px}.menu .panel{padding:36px;max-width:900px;width:min(92vw,900px)}
+.grade-row{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin:22px 0}.grade-card{width:250px;min-height:150px;padding:22px;border-radius:26px;background:rgba(255,255,255,.18);border:2px solid rgba(255,255,255,.35);cursor:pointer;transition:.15s}.grade-card:hover{transform:translateY(-6px);background:rgba(255,255,255,.27)}.grade-card.selected{outline:5px solid #ffe071;background:rgba(255,224,113,.3)}.grade-card h2{font-family:var(--kaiti);font-size:34px;margin:0 0 12px}.grade-card p{font-family:var(--kaiti);font-size:22px;margin:0;color:#fff7cd}
+.map-path{position:absolute;inset:0;background:radial-gradient(circle at 20% 20%,#7fdfff55,transparent 25%),linear-gradient(145deg,#4d7cff,#9257ff 45%,#ff7fb5);}
+.cloud{position:absolute;font-size:58px;opacity:.75;animation:drift 16s linear infinite}.c1{top:10%;left:-10%;animation-duration:25s}.c2{top:30%;left:-20%;animation-duration:32s}.c3{top:70%;left:-15%;animation-duration:28s}@keyframes drift{from{transform:translateX(0)}to{transform:translateX(125vw)}}
+.map-nodes{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:42px;z-index:4;flex-wrap:wrap;padding:40px}.node{width:220px;height:220px;border-radius:44px;background:rgba(255,255,255,.18);border:2px solid rgba(255,255,255,.38);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.25)}.node .emoji{font-size:70px}.node h3{font-family:var(--kaiti);font-size:28px;margin:10px 0 4px}.node p{font-size:16px;margin:0 0 12px;color:#fff7cd}.locked{filter:grayscale(.8);opacity:.55}
+#game{background:#111}.hud{position:absolute;top:14px;left:14px;right:14px;height:74px;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 16px;background:rgba(16,24,43,.72);backdrop-filter:blur(8px);border:2px solid rgba(255,255,255,.25);border-radius:22px}.hud-left,.hud-right{display:flex;align-items:center;gap:12px}.pill{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:8px 13px;font-weight:800}.timer{font-size:26px;color:#ffe071}.timer.danger{color:#ff6161;animation:shake .22s infinite}@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+.stage{position:absolute;inset:0;overflow:hidden}.prompt-dock{position:absolute;left:50%;bottom:28px;transform:translateX(-50%);z-index:25;width:min(860px,92vw);padding:14px 18px;border-radius:28px;background:rgba(255,255,255,.2);backdrop-filter:blur(12px);border:2px solid rgba(255,255,255,.35);box-shadow:0 15px 45px rgba(0,0,0,.32);display:grid;grid-template-columns:1fr 1.4fr auto;align-items:center;gap:14px}.target{font-family:var(--kaiti);font-size:46px;line-height:1;text-align:center;color:#fff;text-shadow:0 4px 0 rgba(0,0,0,.2)}.input{height:54px;border:0;border-radius:18px;padding:0 18px;font-size:26px;outline:none;background:#fff;color:#20243a}.hint{position:absolute;left:50%;bottom:118px;transform:translateX(-50%);z-index:24;font-family:var(--kaiti);font-size:24px;color:#fff7cd;text-shadow:0 2px 0 #0007;min-height:32px}.feedback{position:absolute;left:50%;top:25%;transform:translate(-50%,-50%);z-index:28;font-size:48px;font-weight:900;text-shadow:0 6px 0 rgba(0,0,0,.25);pointer-events:none;opacity:0}.feedback.show{animation:popfade .9s ease-out}@keyframes popfade{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}20%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}100%{opacity:0;transform:translate(-50%,-80%) scale(1)}}
+/* forest */
+.forest{background:linear-gradient(#70d6ff 0%,#b7f7ff 45%,#54c96a 46%,#1f9940 100%)}.forest .sun{position:absolute;right:8%;top:12%;font-size:90px;animation:spin 12s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.hill{position:absolute;bottom:0;width:140%;height:34%;left:-10%;background:radial-gradient(ellipse at center,#32b84c 0%,#21933f 70%);border-radius:50% 50% 0 0}.tree{position:absolute;bottom:22%;font-size:80px;animation:sway 2.8s ease-in-out infinite}.t1{left:5%}.t2{right:8%;animation-delay:.6s}.t3{left:78%;bottom:18%;font-size:65px}@keyframes sway{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2deg)}}.butter{position:absolute;font-size:36px;animation:butter 7s ease-in-out infinite}.b1{left:12%;top:35%}.b2{right:18%;top:30%;animation-delay:1s}@keyframes butter{0%,100%{transform:translate(0,0) rotate(0)}50%{transform:translate(35px,-28px) rotate(15deg)}}.balloon{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);font-family:var(--kaiti);font-size:72px;width:190px;height:230px;border-radius:50% 50% 46% 46%;background:radial-gradient(circle at 32% 25%,#fff9,#ff6b9e 25%,#d8336c 70%);display:flex;align-items:center;justify-content:center;box-shadow:inset -18px -22px 0 rgba(0,0,0,.15),0 22px 50px rgba(0,0,0,.25);animation:balloonFloat 2.2s ease-in-out infinite;color:#fff;text-shadow:0 4px 0 rgba(0,0,0,.2)}.balloon:after{content:"";position:absolute;bottom:-32px;width:3px;height:40px;background:#fff8}.balloon.warn{animation:balloonDanger .25s infinite;background:radial-gradient(circle at 32% 25%,#fff9,#ff5b5b 25%,#9d1111 70%)}@keyframes balloonFloat{0%,100%{transform:translate(-50%,-50%) rotate(-3deg)}50%{transform:translate(-50%,-60%) rotate(3deg)}}@keyframes balloonDanger{0%,100%{transform:translate(-50%,-50%) scale(1.12) rotate(-5deg)}50%{transform:translate(-50%,-52%) scale(1.22) rotate(5deg)}}
+/* maze */
+.maze{background:linear-gradient(#20204d,#2b2365 55%,#18152f)}.walls{position:absolute;inset:0;background-image:linear-gradient(90deg,rgba(255,255,255,.08) 10px,transparent 10px),linear-gradient(rgba(255,255,255,.08) 10px,transparent 10px);background-size:90px 90px;animation:scrollMaze 2.2s linear infinite}.track{position:absolute;left:0;right:0;top:43%;height:170px;background:linear-gradient(90deg,#ffd166 0 50%,#f78c6b 50% 100%);background-size:120px 100%;border-top:8px solid #fff4;border-bottom:8px solid #0004;animation:road 1s linear infinite}@keyframes road{to{background-position:-120px 0}}@keyframes scrollMaze{to{background-position:-90px 0,-90px 0}}.runner{position:absolute;left:32%;top:45%;font-size:92px;z-index:4;animation:runbob .35s ease-in-out infinite}.monster{position:absolute;left:10%;top:47%;font-size:82px;z-index:4;animation:monsterHop .55s ease-in-out infinite}.finish{position:absolute;right:8%;top:45%;font-size:80px;z-index:3}.dash{animation:dash .45s ease-out!important}@keyframes runbob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-16px) rotate(3deg)}}@keyframes monsterHop{0%,100%{transform:translateY(0) scaleX(1)}50%{transform:translateY(-18px) scaleX(1.08)}}@keyframes dash{0%{transform:translateX(0)}50%{transform:translateX(100px) scale(1.25)}100%{transform:translateX(0)}}
+/* space */
+.space{background:radial-gradient(circle at 70% 20%,#5e5cff 0%,transparent 22%),linear-gradient(#090b2e,#16124d 60%,#070713)}.stars{position:absolute;inset:0;background-image:radial-gradient(#fff 1px,transparent 1px);background-size:40px 40px;animation:stars 2.4s linear infinite}@keyframes stars{to{background-position:-80px 60px}}.planet{position:absolute;border-radius:50%;opacity:.9}.p1{width:160px;height:160px;background:#ffcd70;right:8%;top:20%;box-shadow:inset -25px -20px #e8793a}.p2{width:90px;height:90px;background:#61e0ff;left:9%;bottom:18%;box-shadow:inset -18px -15px #2380c3}.rocket{position:absolute;left:22%;top:43%;font-size:100px;z-index:4;animation:rocket 1s ease-in-out infinite}.meteor{position:absolute;right:22%;top:38%;font-family:var(--kaiti);font-size:58px;padding:25px 35px;border-radius:45px;background:linear-gradient(135deg,#ff5e5e,#ffd166);box-shadow:0 20px 50px rgba(0,0,0,.35);animation:meteor 2s linear infinite;color:#fff;text-shadow:0 4px #0004}.boss{position:absolute;right:6%;top:38%;font-size:110px;animation:boss 1.3s ease-in-out infinite}@keyframes rocket{0%,100%{transform:translateY(0) rotate(8deg)}50%{transform:translateY(-18px) rotate(2deg)}}@keyframes meteor{from{transform:translateX(60px) rotate(3deg)}to{transform:translateX(-60px) rotate(-3deg)}}@keyframes boss{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+
+/* tension upgrades */
+.distanceBar{position:absolute;left:50%;top:30%;transform:translateX(-50%);width:min(520px,72vw);height:18px;border-radius:999px;background:rgba(255,255,255,.22);border:2px solid rgba(255,255,255,.45);z-index:6;overflow:hidden;box-shadow:0 8px 20px #0005}.distanceFill{height:100%;width:100%;border-radius:999px;background:linear-gradient(90deg,#53ff82,#ffe071,#ff5b5b);transition:width .22s linear}.distanceLabel{position:absolute;left:50%;top:calc(30% - 34px);transform:translateX(-50%);font-family:var(--kaiti);font-size:22px;color:#fff7cd;text-shadow:0 3px #0006;z-index:6}.dangerAura{position:absolute;inset:0;pointer-events:none;opacity:0;background:radial-gradient(circle at 18% 52%,rgba(255,0,70,.38),transparent 22%),radial-gradient(circle at 35% 52%,rgba(255,0,70,.22),transparent 30%);z-index:2;transition:.2s}.maze.hot .dangerAura{opacity:1}.maze.hot .track{animation-duration:.55s}.maze.hot .walls{animation-duration:1s}.maze.hot .monster{filter:drop-shadow(0 0 18px #ff5353);animation-duration:.32s}.runner.safePulse{filter:drop-shadow(0 0 24px #79ff9d)}
+.warningText{position:absolute;left:50%;top:23%;transform:translateX(-50%);z-index:7;font-family:var(--kaiti);font-size:34px;color:#ffef7a;text-shadow:0 4px #0008;opacity:0;animation:warnBlink .55s ease-in-out infinite}.space.hot .warningText{opacity:1}@keyframes warnBlink{0%,100%{transform:translateX(-50%) scale(1)}50%{transform:translateX(-50%) scale(1.08)}}.space.hot .stars{animation-duration:.75s}.space.hot .meteor{animation-duration:.85s;filter:drop-shadow(0 0 18px #ff5b5b)}.space.hot .rocket{animation-duration:.45s;filter:drop-shadow(0 0 18px #70d6ff)}.space.hot{box-shadow:inset 0 0 80px rgba(255,0,90,.38)}.laser{position:absolute;left:31%;top:49%;height:8px;width:0;background:#9cfffa;border-radius:999px;box-shadow:0 0 18px #9cfffa;z-index:5;animation:laser .28s ease-out forwards}@keyframes laser{to{width:42vw;opacity:0}}.shock{animation:screenShake .22s linear 2}@keyframes screenShake{0%,100%{transform:translate(0)}25%{transform:translate(5px,-3px)}50%{transform:translate(-5px,4px)}75%{transform:translate(3px,3px)}}.bossHealth{position:absolute;right:5%;top:32%;width:160px;height:16px;border-radius:999px;background:#0006;border:2px solid #fff7;overflow:hidden;z-index:5}.bossHealth span{display:block;height:100%;width:100%;background:linear-gradient(90deg,#ff5b5b,#ffe071);transition:width .25s}
+
+.particles{position:absolute;inset:0;pointer-events:none;z-index:30}.particle{position:absolute;width:12px;height:12px;border-radius:50%;background:#ffe071;animation:particle .75s ease-out forwards}@keyframes particle{to{transform:translate(var(--x),var(--y)) scale(0);opacity:0}}
+.results{height:100%;display:flex;align-items:center;justify-content:center;text-align:center;background:linear-gradient(135deg,#3a86ff,#8338ec,#ff006e)}.results .panel{padding:34px;max-width:800px}.badge-row{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;margin:20px}.badge{font-size:60px;background:rgba(255,255,255,.18);border-radius:28px;padding:18px;animation:badgeIn .7s ease-out both}@keyframes badgeIn{from{transform:scale(0) rotate(-180deg)}to{transform:scale(1) rotate(0)}}
+@media(max-width:700px){.prompt-dock{grid-template-columns:1fr;bottom:12px}.target{font-size:40px}.hud{height:auto;flex-wrap:wrap}.title{font-size:44px}.runner,.rocket{left:24%}.monster{left:4%}}
 </style>
 </head>
 <body>
-  <div class="cloud c1"></div><div class="cloud c2"></div><div class="hill h1"></div><div class="hill h2"></div><div class="star-bg s1">✨</div><div class="star-bg s2">⭐</div><div class="star-bg s3">🌟</div>
-  <div class="app">
-    <section id="home" class="card">
-      <h1>拼音打字小勇士</h1>
-      <div class="subtitle">进入拼音能量训练场，完成三关挑战，收集三个徽章！</div>
-      <div class="mascot">🐼⌨️💠</div>
-      <div class="center"><button id="soundBtn" class="btn secondary" onclick="toggleSound()">音效：开</button></div>
-      <div class="center">
-        <button class="btn" onclick="showLevels()">开始游戏</button>
+<div id="app">
+  <section id="menu" class="screen active">
+    <div class="map-path"></div><div class="cloud c1">☁️</div><div class="cloud c2">☁️</div><div class="cloud c3">☁️</div>
+    <div class="menu"><div class="panel">
+      <h1 class="title">拼拼熊大冒险</h1><p class="subtitle">打拼音，闯三关！</p>
+      <div class="grade-row">
+        <div class="grade-card selected" data-grade="p1"><h2>一年级</h2><p>慢一点，多提示</p></div>
+        <div class="grade-card" data-grade="p2"><h2>二年级</h2><p>快一点，多词语</p></div>
       </div>
-    </section>
-
-    <section id="levels" class="card hidden">
-      <h1>选择关卡</h1>
-      <div class="level-grid">
-        <div class="level-card">
-          <div class="badge">⭐</div>
-          <h2>第一关：生字能量站</h2>
-          <p>看生字，打拼音。</p>
-          <button class="btn" onclick="startLevel(1)">开始第一关</button>
-        </div>
-        <div class="level-card">
-          <div class="badge">🏅</div>
-          <h2>第二关：词语轨道</h2>
-          <p>完成第一关后解锁。</p>
-          <button id="level2btn" class="btn locked" onclick="startLevel(2)">进入第二关</button>
-        </div>
-        <div class="level-card">
-          <div class="badge">🏆</div>
-          <h2>第三关：句子挑战塔</h2>
-          <p>完成第二关后解锁。</p>
-          <button id="level3btn" class="btn locked" onclick="startLevel(3)">进入第三关</button>
-        </div>
-      </div>
-      <div class="center"><button class="btn secondary" onclick="resetGame()">重新挑战</button></div>
-    </section>
-
-    <section id="game" class="card hidden">
-      <div class="stage-title" id="stageTitle"></div>
-      <div class="hud">
-        <div>题目 <span id="qNum">1</span>/<span id="qTotal">5</span></div>
-        <div>时间 <span id="timeLeft">10</span> 秒</div>
-        <div>得分 <span id="score">0</span></div>
-        <div>徽章 <span id="badges">0</span>/3</div>
-      </div>
-      <div class="play-area" id="playArea">
-        <div class="track"></div>
-        <div class="balloon-wrap">
-          <div id="balloon" class="balloon">
-            <div id="word" class="word">人</div>
-          </div>
-        </div>
-        <div class="input-row">
-          <input id="answer" placeholder="请输入拼音，如 ren" autocomplete="off" />
-          <button class="btn" onclick="checkAnswer()">提交</button>
-        </div>
-        <div id="feedback" class="feedback"></div>
-        <div id="pinyinShow" class="pinyin-show"></div>
-      </div>
-    </section>
-
-    <section id="levelComplete" class="card hidden center">
-      <h1 id="completeTitle">过关啦！</h1>
-      <div id="earnedBadge" class="badge-row sparkle">⭐</div>
-      <div id="completeMsg" class="result-list"></div>
-      <button id="nextLevelBtn" class="btn" onclick="goNextLevel()">进入下一关</button>
-      <button class="btn secondary" onclick="showLevels()">查看关卡</button>
-    </section>
-
-    <section id="final" class="card hidden center">
-      <h1>太棒了！</h1>
-      <div class="mascot sparkle">🐼🎉🏆</div>
-      <div class="result-list">
-        你完成了拼音打字挑战！<br>
-        我的得分：<span id="finalScore"></span><br>
-        我的正确率：<span id="finalAcc"></span>%<br>
-        我获得的徽章：⭐ 🏅 🏆
-      </div>
-      <button class="btn" onclick="resetGame()">重新挑战</button>
-    </section>
-  </div>
-
+      <button id="startBtn" class="btn pulse">开始游戏</button>
+    </div></div>
+  </section>
+  <section id="map" class="screen">
+    <div class="map-path"></div><div class="cloud c1">☁️</div><div class="cloud c2">☁️</div><div class="cloud c3">☁️</div>
+    <div class="map-nodes">
+      <div class="node" id="node1"><div class="emoji">🎈</div><h3>生字森林</h3><p>单字拼音</p><button class="btn smallbtn playLevel" data-level="0">开始</button></div>
+      <div class="node locked" id="node2"><div class="emoji">🏃</div><h3>迷宫快跑</h3><p>词语拼音</p><button class="btn smallbtn playLevel" data-level="1">开始</button></div>
+      <div class="node locked" id="node3"><div class="emoji">🚀</div><h3>星空挑战</h3><p>短句拼音</p><button class="btn smallbtn playLevel" data-level="2">开始</button></div>
+    </div>
+  </section>
+  <section id="game" class="screen">
+    <div id="stage" class="stage"></div>
+    <div class="hud"><div class="hud-left"><span class="pill" id="levelName">第一关</span><span class="pill">⭐ <b id="score">0</b></span><span class="pill">🔥 <b id="combo">0</b></span></div><div class="hud-right"><span class="pill timer" id="timer">10</span><button id="soundBtn" class="btn smallbtn">🔊</button><button id="homeBtn" class="btn smallbtn">地图</button></div></div>
+    <div class="hint" id="hint"></div><div class="feedback" id="feedback"></div><div class="particles" id="particles"></div>
+    <div class="prompt-dock"><div class="target" id="target">人</div><input class="input" id="answer" autocomplete="off" placeholder="输入拼音，如 ren"><button id="submitBtn" class="btn smallbtn">确定</button></div>
+  </section>
+  <section id="results" class="screen"><div class="results"><div class="panel"><h1 class="title">太棒了！</h1><p class="subtitle" id="resultText">你完成了挑战！</p><div class="badge-row" id="badges"></div><button id="againBtn" class="btn">再玩一次</button></div></div></section>
+</div>
 <script>
-const levelData = {
-  1: {
-    title: "第一关：生字能量站",
-    time: 10,
-    points: 10,
-    badge: "⭐",
-    badgeName: "生字小星星",
-    items: [
-      {zh:"人", py:"ren", tone:"rén"}, {zh:"口", py:"kou", tone:"kǒu"},
-      {zh:"木", py:"mu", tone:"mù"}, {zh:"土", py:"tu", tone:"tǔ"},
-      {zh:"八", py:"ba", tone:"bā"}, {zh:"女", py:"nv", tone:"nǚ"},
-      {zh:"儿", py:"er", tone:"ér"}, {zh:"日", py:"ri", tone:"rì"},
-      {zh:"子", py:"zi", tone:"zǐ"}, {zh:"山", py:"shan", tone:"shān"},
-      {zh:"羊", py:"yang", tone:"yáng"}, {zh:"田", py:"tian", tone:"tián"},
-      {zh:"手", py:"shou", tone:"shǒu"}, {zh:"牛", py:"niu", tone:"niú"},
-      {zh:"月", py:"yue", tone:"yuè"}, {zh:"天", py:"tian", tone:"tiān"},
-      {zh:"水", py:"shui", tone:"shuǐ"}
-    ]
-  },
-  2: {
-    title: "第二关：词语轨道",
-    time: 15,
-    points: 15,
-    badge: "🏅",
-    badgeName: "词语小达人",
-    items: [
-      {zh:"山羊", py:"shan yang", tone:"shān yáng"},
-      {zh:"太阳", py:"tai yang", tone:"tài yáng"},
-      {zh:"爸爸", py:"ba ba", tone:"bà ba"},
-      {zh:"妈妈", py:"ma ma", tone:"mā ma"},
-      {zh:"大小", py:"da xiao", tone:"dà xiǎo"},
-      {zh:"上下", py:"shang xia", tone:"shàng xià"},
-      {zh:"白云", py:"bai yun", tone:"bái yún"},
-      {zh:"木马", py:"mu ma", tone:"mù mǎ"},
-      {zh:"开门", py:"kai men", tone:"kāi mén"},
-      {zh:"华文", py:"hua wen", tone:"huá wén"}
-    ]
-  },
-  3: {
-    title: "第三关：句子挑战塔",
-    time: 25,
-    points: 20,
-    badge: "🏆",
-    badgeName: "句子小勇士",
-    items: [
-      {zh:"我是小学生。", py:"wo shi xiao xue sheng", tone:"wǒ shì xiǎo xué shēng"},
-      {zh:"爸爸妈妈好。", py:"ba ba ma ma hao", tone:"bà ba mā ma hǎo"},
-      {zh:"山羊在山上。", py:"shan yang zai shan shang", tone:"shān yáng zài shān shàng"},
-      {zh:"小鸟在树上。", py:"xiao niao zai shu shang", tone:"xiǎo niǎo zài shù shàng"},
-      {zh:"今天有白云。", py:"jin tian you bai yun", tone:"jīn tiān yǒu bái yún"}
-    ]
-  }
+const DATA={
+ p1:{
+  single:[['人',['ren']],['口',['kou']],['木',['mu']],['土',['tu']],['女',['nv']],['儿',['er']],['日',['ri']],['子',['zi']],['山',['shan']],['羊',['yang']],['田',['tian']],['手',['shou']],['牛',['niu']],['月',['yue']],['水',['shui']],['长',['chang','zhang']],['只',['zhi']],['乐',['le','yue']],['还',['hai']]],
+  words:[['爸爸',['baba']],['妈妈',['mama']],['山羊',['shanyang']],['太阳',['taiyang']],['上山',['shangshan']],['下车',['xiache']],['白云',['baiyun']],['开门',['kaimen']],['长大',['zhangda']],['快乐',['kuaile']]],
+  sent:[['我是小学生',['woshixiaoxuesheng']],['爸爸妈妈好',['babamamahao']],['山羊在山上',['shanyangzaishanshang']],['今天有白云',['jintianyou_baiyun','jintianyou baiyun','jintianyou_baiyun'.replace('_','')]],['我很快乐',['wohenkuaile']]]
+ },
+ p2:{
+  single:[['行',['xing','hang']],['重',['zhong','chong']],['觉',['jue','jiao']],['种',['zhong']],['教',['jiao','jiao']],['得',['de','dei','de']],['难',['nan']],['绿',['lv']],['张',['zhang']],['更',['geng']]],
+  words:[['长高',['zhanggao']],['行走',['xingzou']],['快乐',['kuaile']],['音乐',['yinyue']],['觉得',['juede']],['睡觉',['shuijiao']],['种子',['zhongzi']],['教室',['jiaoshi']],['绿色',['lvse']],['更好',['genghao']]],
+  sent:[['我喜欢音乐',['woxihuanyinyue']],['小朋友在跑步',['xiaopengyouzaipaobu']],['我觉得很快乐',['wojuedehenkuaile']],['绿色的树真美',['lvsedeshu真mei'.replace('真','zhen')]],['我们一起行走',['womenyiqixingzou']]]
+ }
 };
-
-let unlocked = 1;
-let badges = [];
-let currentLevel = 1;
-let questions = [];
-let index = 0;
-let score = 0;
-let totalAnswered = 0;
-let totalCorrect = 0;
-let timeLeft = 10;
-let timer = null;
-let answered = false;
-let soundOn = true;
-let audioCtx = null;
-function beep(freq=600, duration=.12, type="sine", volume=.08){
-  if(!soundOn) return;
-  audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  osc.type = type; osc.frequency.value = freq;
-  gain.gain.value = volume;
-  osc.connect(gain); gain.connect(audioCtx.destination);
-  osc.start();
-  gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
-  osc.stop(audioCtx.currentTime + duration);
+const LEVELS=[{name:'第一关 生字森林',time:12,badge:'🌟',stage:'forest'},{name:'第二关 迷宫快跑',time:16,badge:'🏅',stage:'maze'},{name:'第三关 星空挑战',time:22,badge:'🏆',stage:'space'}];
+let grade='p1',level=0,qIndex=0,score=0,combo=0,unlocked=0,timer=0,tick=null,muted=false,current=null,panicPlayed=false;
+const $=id=>document.getElementById(id);const screens=['menu','map','game','results'];function show(id){screens.forEach(s=>$(s).classList.toggle('active',s===id));}
+function unlockAudio(){
+  if(muted) return;
+  try{
+    let AC=window.AudioContext||window.webkitAudioContext;
+    if(!AC) return;
+    let ctx=sound.ctx||(sound.ctx=new AC());
+    if(ctx.state==='suspended') ctx.resume();
+    // silent warm-up so later explosion / catch sounds work on Chrome, Edge, iPad Safari
+    let o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);g.gain.value=0.0001;o.start();o.stop(ctx.currentTime+0.02);
+  }catch(e){}
 }
-function playCorrect(){ beep(660,.08,"sine",.07); setTimeout(()=>beep(880,.12,"sine",.07),90); }
-function playWrong(){ beep(220,.18,"sawtooth",.06); }
-function playPop(){ beep(90,.18,"sawtooth",.12); setTimeout(()=>beep(55,.25,"square",.08),70); }
-function playBadge(){ [523,659,784,1046].forEach((f,i)=>setTimeout(()=>beep(f,.11,"triangle",.08),i*95)); }
-function toggleSound(){ soundOn=!soundOn; document.getElementById("soundBtn").textContent = "音效：" + (soundOn ? "开" : "关"); }
-function makeExplosion(){
-  const area = document.getElementById("playArea");
-  area.classList.add("screen-flash");
-  setTimeout(()=>area.classList.remove("screen-flash"),380);
-  for(let i=0;i<42;i++){
-    const p=document.createElement("span");
-    p.className="particle";
-    const angle=(Math.PI*2*i/42);
-    const dist=110+Math.random()*140;
-    p.style.setProperty("--x", Math.cos(angle)*dist+"px");
-    p.style.setProperty("--y", Math.sin(angle)*dist+"px");
-    area.appendChild(p);
-    setTimeout(()=>p.remove(),950);
-  }
+document.querySelectorAll('.grade-card').forEach(c=>c.onclick=()=>{document.querySelectorAll('.grade-card').forEach(x=>x.classList.remove('selected'));c.classList.add('selected');grade=c.dataset.grade;});
+$('startBtn').onclick=()=>{unlockAudio();score=0;combo=0;unlocked=0;$('score').textContent='0';$('combo').textContent='0';show('map');renderMap();};$('homeBtn').onclick=()=>{unlockAudio();show('map');clearInterval(tick);renderMap();};$('soundBtn').onclick=()=>{muted=!muted;$('soundBtn').textContent=muted?'🔇':'🔊'; if(!muted) unlockAudio();};$('againBtn').onclick=()=>{level=0;qIndex=0;score=0;combo=0;unlocked=0;$('score').textContent='0';$('combo').textContent='0';show('menu');};
+document.querySelectorAll('.playLevel').forEach(b=>b.onclick=()=>{let l=+b.dataset.level;if(l<=unlocked) startLevel(l);});
+$('submitBtn').onclick=check;$('answer').addEventListener('keydown',e=>{if(e.key==='Enter')check();});
+function renderMap(){for(let i=0;i<3;i++)$('node'+(i+1)).classList.toggle('locked',i>unlocked)}
+function startLevel(l){unlockAudio();level=l;qIndex=0;combo=0;show('game');$('score').textContent=score;$('combo').textContent=combo;buildStage();nextQ();}
+function buildStage(){let st=LEVELS[level].stage, html=''; if(st==='forest') html=`<div class="forest stage"><div class="sun">☀️</div><div class="hill"></div><div class="tree t1">🌳</div><div class="tree t2">🌲</div><div class="tree t3">🌴</div><div class="butter b1">🦋</div><div class="butter b2">🐦</div><div class="balloon" id="mainThing">字</div></div>`; if(st==='maze') html=`<div class="maze stage" id="mazeStage"><div class="walls"></div><div class="dangerAura"></div><div class="track"></div><div class="distanceLabel">别让小怪追上拼拼熊！</div><div class="distanceBar"><div class="distanceFill" id="distanceFill"></div></div><div class="runner" id="runner">🐼</div><div class="monster" id="monster">👾</div><div class="finish">🏁</div></div>`; if(st==='space') html=`<div class="space stage" id="spaceStage"><div class="stars"></div><div class="warningText">陨石靠近了！</div><div class="planet p1"></div><div class="planet p2"></div><div class="rocket" id="rocket">🚀</div><div class="meteor" id="mainThing">字</div><div class="bossHealth"><span id="bossHP"></span></div><div class="boss" id="boss">🤖</div></div>`; $('stage').innerHTML=html;}
+function listForLevel(){return level===0?DATA[grade].single:level===1?DATA[grade].words:DATA[grade].sent}
+function nextQ(){clearInterval(tick);let arr=listForLevel(); if(qIndex>=Math.min(arr.length,8)){completeLevel();return;} current=arr[qIndex++]; $('target').textContent=current[0]; let mt=$('mainThing'); if(mt) mt.textContent=current[0]; $('answer').value=''; $('answer').focus(); $('hint').textContent=''; $('levelName').textContent=LEVELS[level].name; timer=LEVELS[level].time; panicPlayed=false; updateTimer(); tick=setInterval(()=>{timer--;updateTimer(); if(timer<=0){clearInterval(tick);wrong(true)}},1000);}
+function updateTimer(){
+ let t=$('timer'), max=LEVELS[level].time, ratio=Math.max(0,Math.min(1,timer/max));
+ t.textContent='⏱ '+timer;t.classList.toggle('danger',timer<=5);
+ let mt=$('mainThing'); if(mt) mt.classList.toggle('warn',timer<=5);
+ let maze=$('mazeStage'), monster=$('monster'), fill=$('distanceFill');
+ if(level===1 && maze && monster){
+   const runnerX=32, far=7, near=25.5; // left percentages; near means monster almost catches panda
+   const pos=far+(1-ratio)*(near-far);
+   monster.style.left=pos+'%';
+   if(fill) fill.style.width=Math.max(8, ratio*100)+'%';
+   maze.classList.toggle('hot',timer<=5);
+   if(timer<=5 && !panicPlayed){panicPlayed=true;panicSound();}
+ }
+ let space=$('spaceStage'), hp=$('bossHP');
+ if(level===2 && space){
+   space.classList.toggle('hot',timer<=7);
+   if(hp) hp.style.width=Math.max(12,(1-(qIndex-1)/Math.min(listForLevel().length,8))*100)+'%';
+   if(timer<=7 && !panicPlayed){panicPlayed=true;panicSound();}
+ }
 }
-
-function hideAll(){ ["home","levels","game","levelComplete","final"].forEach(id => document.getElementById(id).classList.add("hidden")); }
-function showLevels(){
-  hideAll(); document.getElementById("levels").classList.remove("hidden");
-  document.getElementById("level2btn").className = unlocked >= 2 ? "btn" : "btn locked";
-  document.getElementById("level3btn").className = unlocked >= 3 ? "btn" : "btn locked";
+function clean(s){return (s||'').toLowerCase().replace(/[^a-zv]/g,'');}
+function check(){let ans=clean($('answer').value); if(!ans)return; let ok=current[1].map(clean).includes(ans); if(ok) correct(); else wrong(false);}
+function correct(){clearInterval(tick);score+=10+combo*2;combo++;$('score').textContent=score;$('combo').textContent=combo;pop(combo>=5?'太棒了！':'答对了！');sound(720,.08);sound(960,.08,.08);sceneCorrect();setTimeout(nextQ,720);}
+function wrong(timeout){
+ combo=0;$('combo').textContent=combo;
+ if(timeout && level===0){pop('砰！气球爆了！');}
+ else if(timeout && level===1){pop('小怪追上了！'); caughtSound();}
+ else if(timeout && level===2){pop('危险！陨石太近了！'); alarmSound();}
+ else pop('再试一次');
+ sound(180,.16);sceneWrong();
+ let tip=''; if(current[0].includes('女')||current[1].some(x=>x.includes('v'))) tip='小提示：ü 用 v，例如 女 = nv'; else if(current[0].includes('长')) tip='小提示：长 可以读 chang 或 zhang，看词语意思。'; else if(current[0].includes('行')) tip='小提示：行 可以读 xing 或 hang。'; $('hint').textContent=tip||('正确拼音：'+current[1][0]); setTimeout(nextQ,1200);
 }
-function shuffle(arr){ return [...arr].sort(() => Math.random() - 0.5); }
-function startLevel(lv){
-  if(lv > unlocked) return;
-  currentLevel = lv;
-  questions = shuffle(levelData[lv].items).slice(0, lv === 3 ? 5 : 8);
-  index = 0;
-  hideAll(); document.getElementById("game").classList.remove("hidden");
-  document.getElementById("stageTitle").textContent = levelData[lv].title;
-  document.getElementById("qTotal").textContent = questions.length;
-  loadQuestion();
+function completeLevel(){unlocked=Math.max(unlocked,level+1);pop('获得徽章 '+LEVELS[level].badge);sound(520,.12);sound(780,.12,.12);sound(1040,.16,.24);burst(innerWidth/2,innerHeight/2,36); if(level<2){show('map');renderMap();}else finish();}
+function finish(){show('results');$('resultText').textContent=`得分：${score}`;$('badges').innerHTML=LEVELS.map(x=>`<div class="badge">${x.badge}</div>`).join('');}
+function pop(txt){let f=$('feedback');f.textContent=txt;f.classList.remove('show');void f.offsetWidth;f.classList.add('show')}
+function sceneCorrect(){
+ burst(innerWidth/2,innerHeight/2,18);
+ let r=$('runner'); if(r){r.classList.add('dash','safePulse'); setTimeout(()=>r.classList.remove('dash','safePulse'),520);}
+ let rocket=$('rocket'), space=$('spaceStage'), boss=$('boss');
+ if(rocket){rocket.style.filter='drop-shadow(0 0 22px #fff)';setTimeout(()=>rocket.style.filter='',350)}
+ if(space){let l=document.createElement('div');l.className='laser';space.appendChild(l);setTimeout(()=>l.remove(),320); if(boss){boss.style.transform='scale(.86) rotate(-8deg)';setTimeout(()=>boss.style.transform='',250)} }
 }
-function loadQuestion(){
-  answered = false;
-  clearInterval(timer);
-  const data = levelData[currentLevel];
-  const q = questions[index];
-  timeLeft = data.time;
-  document.getElementById("qNum").textContent = index + 1;
-  document.getElementById("timeLeft").textContent = timeLeft;
-  document.getElementById("timeLeft").classList.remove("timer-hot");
-  document.getElementById("score").textContent = score;
-  document.getElementById("badges").textContent = badges.length;
-  document.getElementById("word").textContent = q.zh;
-  document.getElementById("answer").value = "";
-  document.getElementById("answer").disabled = false;
-  document.getElementById("answer").focus();
-  document.getElementById("feedback").textContent = "";
-  document.getElementById("feedback").className = "feedback";
-  document.getElementById("pinyinShow").textContent = "";
-  const balloon = document.getElementById("balloon");
-  balloon.className = "balloon";
-  balloon.style.setProperty("--scale", "1");
-  timer = setInterval(tick, 1000);
+function sceneWrong(){
+ let stage=$('stage'); stage.classList.add('shock'); setTimeout(()=>stage.classList.remove('shock'),500);
+ let m=$('monster'); if(m){m.style.transform='translateX(48px) scale(1.2)';setTimeout(()=>m.style.transform='',420)}
+ let meteor=$('mainThing'); if(level===2 && meteor){meteor.style.transform='translateX(-120px) scale(1.15)';setTimeout(()=>meteor.style.transform='',420)}
+ burst(innerWidth*.5,innerHeight*.42,18); boomSound();
 }
-function tick(){
-  timeLeft--;
-  document.getElementById("timeLeft").textContent = timeLeft;
-  const maxTime = levelData[currentLevel].time;
-  const scale = 1 + ((maxTime - timeLeft) / maxTime) * 0.65;
-  const balloon = document.getElementById("balloon");
-  balloon.style.setProperty("--scale", scale.toFixed(2));
-  if(timeLeft <= 5) { balloon.classList.add("danger"); document.getElementById("timeLeft").classList.add("timer-hot"); if(timeLeft>0) beep(440,.05,"square",.035); }
-  if(timeLeft <= 0){
-    clearInterval(timer);
-    timeUp();
-  }
+function burst(x,y,n){let box=$('particles'); for(let i=0;i<n;i++){let p=document.createElement('div');p.className='particle';p.style.left=x+'px';p.style.top=y+'px';let a=Math.random()*Math.PI*2,d=50+Math.random()*150;p.style.setProperty('--x',Math.cos(a)*d+'px');p.style.setProperty('--y',Math.sin(a)*d+'px');p.style.background=['#ffe071','#ff6b9e','#70d6ff','#9cff70'][i%4];box.appendChild(p);setTimeout(()=>p.remove(),800)}}
+function sound(freq,dur,delay=0,type='sine',gain=.13){
+ if(muted)return;
+ try{let AC=window.AudioContext||window.webkitAudioContext;let ctx=sound.ctx||(sound.ctx=new AC()); if(ctx.state==='suspended')ctx.resume();let o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.value=freq;o.type=type;let t=ctx.currentTime+delay;g.gain.setValueAtTime(.001,t);g.gain.exponentialRampToValueAtTime(gain,t+.01);g.gain.exponentialRampToValueAtTime(.001,t+dur);o.start(t);o.stop(t+dur+.04)}catch(e){}
 }
-function normalize(s){ return s.trim().toLowerCase().replace(/ü/g,"v").replace(/u:/g,"v").replace(/\s+/g," "); }
-function checkAnswer(){
-  if(answered) return;
-  const q = questions[index];
-  const ans = normalize(document.getElementById("answer").value);
-  if(ans === q.py){
-    answered = true;
-    clearInterval(timer);
-    playCorrect();
-    score += levelData[currentLevel].points;
-    totalAnswered++; totalCorrect++;
-    document.getElementById("score").textContent = score;
-    document.getElementById("feedback").textContent = "答对了！太棒了！";
-    document.getElementById("feedback").className = "feedback correct";
-    document.getElementById("pinyinShow").textContent = q.zh + "  " + q.tone;
-    setTimeout(nextQuestion, 1100);
-  } else {
-    playWrong();
-    document.getElementById("feedback").textContent = "差一点！再试试看。";
-    document.getElementById("feedback").className = "feedback wrong";
-  }
-}
-function timeUp(){
-  answered = true;
-  totalAnswered++;
-  const q = questions[index];
-  document.getElementById("answer").disabled = true;
-  document.getElementById("balloon").classList.add("pop");
-  playPop();
-  makeExplosion();
-  document.getElementById("feedback").textContent = "时间到！气球爆开了！";
-  document.getElementById("feedback").className = "feedback wrong";
-  document.getElementById("pinyinShow").textContent = "正确拼音：" + q.tone + "  请输入：" + q.py;
-  setTimeout(nextQuestion, 1800);
-}
-function nextQuestion(){
-  index++;
-  if(index >= questions.length) completeLevel();
-  else loadQuestion();
-}
-function completeLevel(){
-  clearInterval(timer);
-  const data = levelData[currentLevel];
-  playBadge();
-  if(!badges.includes(currentLevel)) badges.push(currentLevel);
-  if(currentLevel === unlocked && unlocked < 3) unlocked++;
-  hideAll(); document.getElementById("levelComplete").classList.remove("hidden");
-  document.getElementById("earnedBadge").textContent = data.badge;
-  document.getElementById("completeTitle").textContent = "你获得了【" + data.badgeName + "】！";
-  document.getElementById("completeMsg").innerHTML = "本关完成！<br>继续挑战，帮小熊猫收集所有徽章。";
-  document.getElementById("nextLevelBtn").classList.toggle("hidden", currentLevel === 3);
-  if(currentLevel === 3) setTimeout(showFinal, 1400);
-}
-function goNextLevel(){ startLevel(currentLevel + 1); }
-function showFinal(){
-  hideAll(); document.getElementById("final").classList.remove("hidden");
-  document.getElementById("finalScore").textContent = score;
-  const acc = totalAnswered ? Math.round(totalCorrect / totalAnswered * 100) : 0;
-  document.getElementById("finalAcc").textContent = acc;
-}
-function resetGame(){
-  clearInterval(timer);
-  unlocked = 1; badges = []; score = 0; totalAnswered = 0; totalCorrect = 0;
-  hideAll(); document.getElementById("home").classList.remove("hidden");
-}
-document.getElementById("answer").addEventListener("keydown", e => { if(e.key === "Enter") checkAnswer(); });
+function panicSound(){sound(420,.06,0,'square',.08);sound(330,.06,.13,'square',.09);sound(240,.09,.26,'square',.1)}
+function boomSound(){sound(160,.08,0,'sawtooth',.18);sound(82,.25,.04,'triangle',.22);sound(45,.32,.14,'sawtooth',.16)}
+function caughtSound(){sound(95,.18,0,'sawtooth',.22);sound(150,.08,.08,'square',.16);sound(70,.28,.18,'triangle',.18)}
+function alarmSound(){sound(520,.08,0,'square',.12);sound(360,.08,.12,'square',.12);sound(520,.08,.24,'square',.12)}
 </script>
 </body>
 </html>
