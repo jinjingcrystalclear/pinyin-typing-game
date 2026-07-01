@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>拼拼熊大冒险 V3 - Tension UI</title>
+<title>拼拼熊大冒险 V3 - 1A/2A 随机版</title>
 <style>
 :root{
   --kaiti:"KaiTi","STKaiti","楷体","KaiTi_GB2312",serif;
@@ -75,18 +75,32 @@ button,input{font-family:var(--ui)}
 <script>
 const DATA={
  p1:{
-  single:[['人',['ren']],['口',['kou']],['木',['mu']],['土',['tu']],['女',['nv']],['儿',['er']],['日',['ri']],['子',['zi']],['山',['shan']],['羊',['yang']],['田',['tian']],['手',['shou']],['牛',['niu']],['月',['yue']],['水',['shui']],['长',['chang','zhang']],['只',['zhi']],['乐',['le','yue']],['还',['hai']]],
-  words:[['爸爸',['baba']],['妈妈',['mama']],['山羊',['shanyang']],['太阳',['taiyang']],['上山',['shangshan']],['下车',['xiache']],['白云',['baiyun']],['开门',['kaimen']],['长大',['zhangda']],['快乐',['kuaile']]],
-  sent:[['我是小学生',['woshixiaoxuesheng']],['爸爸妈妈好',['babamamahao']],['山羊在山上',['shanyangzaishanshang']],['今天有白云',['jintianyou_baiyun','jintianyou baiyun','jintianyou_baiyun'.replace('_','')]],['我很快乐',['wohenkuaile']]]
+  label:'一年级：只出 1A',
+  single:[
+    ['人',['ren']],['口',['kou']],['一',['yi']],['二',['er']],['五',['wu']],['木',['mu']],['土',['tu']],['马',['ma']],['八',['ba']],['你',['ni']],['我',['wo']],['也',['ye']],['他',['ta']],['不',['bu']],['爸',['ba']],['妈',['ma']],['的',['de']],['女',['nv']],['儿',['er']],['力',['li']],['禾',['he']],['几',['ji']],['七',['qi']],['个',['ge']],['可',['ke']],['去',['qu']],['日',['ri']],['子',['zi']],['车',['che']],['四',['si']],['十',['shi']],['书',['shu']],['山',['shan']],['羊',['yang']],['毛',['mao']],['王',['wang']],['三',['san']],['早',['zao']],['午',['wu']],['田',['tian']],['刀',['dao']],['在',['zai']],['上',['shang']],['下',['xia']],['大',['da']],['小',['xiao']],['来',['lai']],['开',['kai']],['火',['huo']],['关',['guan']],['两',['liang']],['长',['chang','zhang']],['广',['guang']],['多',['duo']],['少',['shao']],['目',['mu']],['手',['shou']],['本',['ben']],['工',['gong']],['门',['men']],['见',['jian']],['又',['you']],['头',['tou']],['牛',['niu']],['贝',['bei']],['六',['liu']],['支',['zhi']],['九',['jiu']],['什',['shen']],['么',['me']],['文',['wen']],['月',['yue']],['天',['tian']],['水',['shui']],['寸',['cun']],['正',['zheng']],['反',['fan']],['白',['bai']],['古',['gu']]
+  ],
+  words:[
+    ['爸爸',['baba']],['妈妈',['mama']],['女儿',['nver']],['山羊',['shanyang']],['太阳',['taiyang']],['老师',['laoshi']],['早安',['zaoan']],['下午',['xiawu']],['玩具',['wanju']],['上下',['shangxia']],['大小',['daxiao']],['开门',['kaimen']],['关门',['guanmen']],['火车',['huoche']],['长大',['zhangda']],['多少',['duoshao']],['书本',['shuben']],['华文',['huawen']],['白云',['baiyun']],['水牛',['shuiniu']],['木马',['muma']],['天上',['tianshang']],['月儿',['yuer']],['来看',['laikan']]
+  ],
+  sent:[
+    ['我有书',['woyoushu']],['我有玩具',['woyouwanju']],['爸爸在家',['babazaijia']],['妈妈在家',['mamazaijia']],['太阳出来了',['taiyangchulaile']],['今天有白云',['jintianyou_baiyun'.replace('_','')]],['小鸟在天上',['xiaoniaozaitianshang']],['山羊来了',['shanyanglaile']],['我看见火车',['wokanjianhuoche']],['门关上了',['menguanshangle']]
+  ]
  },
  p2:{
-  single:[['行',['xing','hang']],['重',['zhong','chong']],['觉',['jue','jiao']],['种',['zhong']],['教',['jiao','jiao']],['得',['de','dei','de']],['难',['nan']],['绿',['lv']],['张',['zhang']],['更',['geng']]],
-  words:[['长高',['zhanggao']],['行走',['xingzou']],['快乐',['kuaile']],['音乐',['yinyue']],['觉得',['juede']],['睡觉',['shuijiao']],['种子',['zhongzi']],['教室',['jiaoshi']],['绿色',['lvse']],['更好',['genghao']]],
-  sent:[['我喜欢音乐',['woxihuanyinyue']],['小朋友在跑步',['xiaopengyouzaipaobu']],['我觉得很快乐',['wojuedehenkuaile']],['绿色的树真美',['lvsedeshu真mei'.replace('真','zhen')]],['我们一起行走',['womenyiqixingzou']]]
+  label:'二年级：只出 2A',
+  single:[
+    ['外',['wai']],['美',['mei']],['丑',['chou']],['新',['xin']],['卖',['mai']],['加',['jia']],['亲',['qin']],['过',['guo']],['现',['xian']],['些',['xie']],['适',['shi']],['试',['shi']],['年',['nian']],['读',['du']],['级',['ji']],['班',['ban']],['帮',['bang']],['专',['zhuan']],['助',['zhu']],['吉',['ji']],['利',['li']],['岁',['sui']],['平',['ping']],['全',['quan']],['福',['fu']],['时',['shi']],['龙',['long']],['真',['zhen']],['杯',['bei']],['送',['song']],['主',['zhu']],['汽',['qi']],['各',['ge']],['非',['fei']],['常',['chang']],['树',['shu']],['林',['lin']],['形',['xing']],['角',['jiao']],['森',['sen']],['从',['cong']],['彩',['cai']],['蓝',['lan']],['绿',['lv']],['黄',['huang']],['音',['yin']],['室',['shi']],['边',['bian']],['向',['xiang']],['往',['wang']],['运',['yun']],['动',['dong']],['行',['xing','hang']],['才',['cai']],['安',['an']],['光',['guang']],['丽',['li']],['茶',['cha']],['糖',['tang']],['饭',['fan']],['青',['qing']],['香',['xiang']],['分',['fen']],['医',['yi']],['病',['bing']],['教',['jiao']],['种',['zhong']],['员',['yuan']],['抓',['zhua']],['怕',['pa']],['住',['zhu']],['阴',['yin']],['晴',['qing']],['冷',['leng']],['热',['re']],['闪',['shan']],['记',['ji']],['得',['de','dei']],['忘',['wang']],['蚂',['ma']],['蚁',['yi']],['爬',['pa']],['蜜',['mi']],['蜂',['feng']],['清',['qing']],['蛙',['wa']],['害',['hai']],['情',['qing']],['让',['rang']],['像',['xiang']]
+  ],
+  words:[
+    ['新年',['xinnian']],['读书',['dushu']],['帮忙',['bangmang']],['专心',['zhuanxin']],['全家',['quanjia']],['身体',['shenti']],['非常',['feichang']],['朋友',['pengyou']],['美丽',['meili']],['绿色',['lvse']],['蓝天',['lantian']],['红花',['honghua']],['树林',['shulin']],['太阳',['taiyang']],['云朵',['yunduo']],['运动',['yundong']],['行走',['xingzou']],['跑步',['paobu']],['学校',['xuexiao']],['青菜',['qingcai']],['星期',['xingqi']],['香味',['xiangwei']],['消防员',['xiaofangyuan']],['放风筝',['fangfengzheng']],['忘记',['wangji']],['蚂蚁',['mayi']],['蜜蜂',['mifeng']],['青蛙',['qingwa']],['害虫',['haichong']],['地方',['difang']],['喜欢',['xihuan']]
+  ],
+  sent:[
+    ['我喜欢运动',['woxihuanyundong']],['我喜欢青菜',['woxihuanqingcai']],['树林很美丽',['shulinhenmeili']],['绿色的树真美',['lvsedeshuzhenmei']],['小朋友在跑步',['xiaopengyouzaipaobu']],['蚂蚁在爬',['mayizaipa']],['蜜蜂在花上',['mifengzaihuashang']],['青蛙捉害虫',['qingwazhuohaichong']],['我们一起行走',['womenyiqixingzou']],['不要忘记带伞',['buyaowangjidaisan']]
+  ]
  }
 };
 const LEVELS=[{name:'第一关 生字森林',time:12,badge:'🌟',stage:'forest'},{name:'第二关 迷宫快跑',time:16,badge:'🏅',stage:'maze'},{name:'第三关 星空挑战',time:22,badge:'🏆',stage:'space'}];
-let grade='p1',level=0,qIndex=0,score=0,combo=0,unlocked=0,timer=0,tick=null,muted=false,current=null,panicPlayed=false;
+let grade='p1',level=0,qIndex=0,score=0,combo=0,unlocked=0,timer=0,tick=null,muted=false,current=null,panicPlayed=false,currentDeck=[];
 const $=id=>document.getElementById(id);const screens=['menu','map','game','results'];function show(id){screens.forEach(s=>$(s).classList.toggle('active',s===id));}
 function unlockAudio(){
   if(muted) return;
@@ -104,10 +118,16 @@ $('startBtn').onclick=()=>{unlockAudio();score=0;combo=0;unlocked=0;$('score').t
 document.querySelectorAll('.playLevel').forEach(b=>b.onclick=()=>{let l=+b.dataset.level;if(l<=unlocked) startLevel(l);});
 $('submitBtn').onclick=check;$('answer').addEventListener('keydown',e=>{if(e.key==='Enter')check();});
 function renderMap(){for(let i=0;i<3;i++)$('node'+(i+1)).classList.toggle('locked',i>unlocked)}
-function startLevel(l){unlockAudio();level=l;qIndex=0;combo=0;show('game');$('score').textContent=score;$('combo').textContent=combo;buildStage();nextQ();}
+function shuffle(arr){
+  let a=[...arr];
+  for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+function startLevel(l){unlockAudio();level=l;qIndex=0;combo=0;currentDeck=shuffle(baseListForLevel()).slice(0,8);show('game');$('score').textContent=score;$('combo').textContent=combo;buildStage();nextQ();}
 function buildStage(){let st=LEVELS[level].stage, html=''; if(st==='forest') html=`<div class="forest stage"><div class="sun">☀️</div><div class="hill"></div><div class="tree t1">🌳</div><div class="tree t2">🌲</div><div class="tree t3">🌴</div><div class="butter b1">🦋</div><div class="butter b2">🐦</div><div class="balloon" id="mainThing">字</div></div>`; if(st==='maze') html=`<div class="maze stage" id="mazeStage"><div class="walls"></div><div class="dangerAura"></div><div class="track"></div><div class="distanceLabel">别让小怪追上拼拼熊！</div><div class="distanceBar"><div class="distanceFill" id="distanceFill"></div></div><div class="runner" id="runner">🐼</div><div class="monster" id="monster">👾</div><div class="finish">🏁</div></div>`; if(st==='space') html=`<div class="space stage" id="spaceStage"><div class="stars"></div><div class="warningText">陨石靠近了！</div><div class="planet p1"></div><div class="planet p2"></div><div class="rocket" id="rocket">🚀</div><div class="meteor" id="mainThing">字</div><div class="bossHealth"><span id="bossHP"></span></div><div class="boss" id="boss">🤖</div></div>`; $('stage').innerHTML=html;}
-function listForLevel(){return level===0?DATA[grade].single:level===1?DATA[grade].words:DATA[grade].sent}
-function nextQ(){clearInterval(tick);let arr=listForLevel(); if(qIndex>=Math.min(arr.length,8)){completeLevel();return;} current=arr[qIndex++]; $('target').textContent=current[0]; let mt=$('mainThing'); if(mt) mt.textContent=current[0]; $('answer').value=''; $('answer').focus(); $('hint').textContent=''; $('levelName').textContent=LEVELS[level].name; timer=LEVELS[level].time; panicPlayed=false; updateTimer(); tick=setInterval(()=>{timer--;updateTimer(); if(timer<=0){clearInterval(tick);wrong(true)}},1000);}
+function baseListForLevel(){return level===0?DATA[grade].single:level===1?DATA[grade].words:DATA[grade].sent}
+function listForLevel(){return currentDeck.length?currentDeck:baseListForLevel()}
+function nextQ(){clearInterval(tick);let arr=listForLevel(); if(qIndex>=arr.length){completeLevel();return;} current=arr[qIndex++]; $('target').textContent=current[0]; let mt=$('mainThing'); if(mt) mt.textContent=current[0]; $('answer').value=''; $('answer').focus(); $('hint').textContent=''; $('levelName').textContent=LEVELS[level].name; timer=LEVELS[level].time; panicPlayed=false; updateTimer(); tick=setInterval(()=>{timer--;updateTimer(); if(timer<=0){clearInterval(tick);wrong(true)}},1000);}
 function updateTimer(){
  let t=$('timer'), max=LEVELS[level].time, ratio=Math.max(0,Math.min(1,timer/max));
  t.textContent='⏱ '+timer;t.classList.toggle('danger',timer<=5);
@@ -124,7 +144,7 @@ function updateTimer(){
  let space=$('spaceStage'), hp=$('bossHP');
  if(level===2 && space){
    space.classList.toggle('hot',timer<=7);
-   if(hp) hp.style.width=Math.max(12,(1-(qIndex-1)/Math.min(listForLevel().length,8))*100)+'%';
+   if(hp) hp.style.width=Math.max(12,(1-(qIndex-1)/listForLevel().length)*100)+'%';
    if(timer<=7 && !panicPlayed){panicPlayed=true;panicSound();}
  }
 }
